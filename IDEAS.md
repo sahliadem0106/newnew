@@ -1,105 +1,124 @@
-# Showcase ideas that prove CreativAI's value
+# CreativAI + AI agents: footage that triggers action
 
-## What CreativAI is
+## The concept
 
-[CreativAI](https://creativ-ai.com) is a video intelligence platform led by Prof. Mohamed Elhoseiny (KAUST, Vision-CAIR group). It indexes video once, up to tens of thousands of hours. After that, everything in it can be **found, questioned and turned into data** using plain language.
+> **CreativAI is the eyes, ears and memory. An AI agent is the brain and hands.**
+> Feed it any footage, recorded or live. CreativAI understands what is happening, and an agent decides what to do and does it: alerting, dispatching, filing, mapping, reporting.
 
-## The rule for a good showcase
+```
+footage (live cams, uploads, phones, YouTube/web)
+        │
+        ▼
+CreativAI ── live questions / search / extraction ──►  "what is happening?"
+        │                                              (vision + audio + time)
+        ▼
+AI agent (e.g. Claude + CreativAI MCP)  ── reasons, checks evidence ──►  ACTION
+                                                                    (alert, ticket, map, SMS, report)
+```
 
-Each idea should make the visitor think: **"this would be impossible without CreativAI."**
+## The filter: what simple computer vision can't do
 
-So every idea is built around one of the product's five value points, and it shows the payoff on screen: how many hours were searched, how long it took, and how long a human would need.
+A fire, a car or a person can be detected by a cheap trained model. Every idea below needs at least one thing simple CV doesn't have:
 
-| # | Value point | API surface |
-|---|---|---|
-| V1 | **Find any moment** in a huge library by describing it | `search.query(cid, "...")` |
-| V2 | **Sees and hears**: matches on visuals, speech and sounds | `search_type="vision" \| "audio" \| "hybrid"` |
-| V3 | **Video becomes data**: ask a question, get a column for every moment | `data_plates` + `knowledge_extraction.add_columns` → CSV, charts, Q&A |
-| V4 | **Live understanding** of a feed as it happens | `live_stream.stream_webrtc/rtmp/rtsp` + `add_questions` |
-| V5 | **Agent-ready**: an AI assistant can reason over the whole library | `agentic_chat` (SSE), 62-tool MCP server |
-
-Its own demos are industrial (dashcams, safety gear). The ideas below show the same five strengths in a form anyone can enjoy.
+1. **Open questions with no training.** You write a new question in plain English today and it works today. CV needs a dataset and a model for each new object.
+2. **Understanding over time.** "She has been standing still at the stove for 10 minutes" or "this car has circled 3 times" is a story, not a single-frame label.
+3. **Sound plus picture.** Someone shouting "help", a child crying, a smoke alarm, people describing what they see.
+4. **Context and intent.** The same scene means different things depending on the situation: a man lying down in a park, or a man lying down in a road at night.
+5. **Searching memory.** "Where else have we seen this?" across thousands of hours.
 
 ---
 
-## ⭐ 1. "The Haystack": human vs. CreativAI (flagship)
+## ⭐ 1. Rescue Radar: disaster response from citizens' videos (flagship)
 
-**Value shown: V1 + V2, plus scale.**
+**Problem.** In a flood, earthquake or fire, the first footage doesn't come from official cameras. It comes from **thousands of people filming on their phones** and posting it. Nobody can watch it all, and the critical clip ("family on a roof, Street 12") gets buried.
 
-The landing page loads a huge archive, for example **2,000 hours** of public-domain films, newsreels and travel videos. A big counter shows it: *"2,000 hours, 83 days of nonstop video."*
+**How it works**
+1. **Collect.** Videos come in from an upload link for citizens and responders, plus CreativAI's built-in **web/YouTube search import** (`start_online_search`, `start_youtube_search`), plus any live drone feed (`stream_rtmp`).
+2. **Understand.** A data plate with AI question columns runs on every clip:
+   - *Are people trapped or stranded? How many?*
+   - *Is anyone injured or calling for help?* (audio + vision)
+   - *Is the road passable for vehicles?*
+   - *Which street signs, shop names or landmarks are visible or mentioned?* (for finding the location)
+   - *Water level relative to cars or doors?*
+3. **Act.** A Claude agent reads the new rows and:
+   - geolocates each clip from landmarks, spoken place names and metadata, and pins it on a live map
+   - ranks the cases by urgency (trapped + injured + rising water = top)
+   - writes a dispatch card for each case: location, number of people, hazards, a 10-second evidence clip
+   - spots **duplicates** (the same roof filmed by 5 people) so rescuers don't go twice
+   - answers commanders in chat: *"Which bridges are still usable in the north district?"*
 
-The visitor types anything, e.g. *"a cat jumps onto a piano"*, *"someone whistling on a train"* or *"fireworks reflected in water"*. In about a second the page shows the exact moments, with a scoreboard:
+**Why simple CV can't do this:** "People trapped", "calling for help" and "road passable" depend on context, sound and reasoning, not object labels. And you can add a new question mid-crisis ("is anyone holding a white flag?") with no retraining.
 
-> **Searched: 2,000 h · Time: 0.9 s · A human watching would need: 250 workdays**
+**API path:** `online search/YouTube import` → `indexing.start` → `data_plates.create_from_collection` → `knowledge_extraction.add_columns` → poll `get_data_plate` → agent → `agentic_chat` for commander Q&A.
 
-Then comes the creative payoff: one click turns the results into a **montage**. A whole sentence can become a short film, with each part of the sentence becoming a shot ("A lonely man walks in the rain → finds a dog → laughs").
+**Demo for the site:** use real public footage from a past flood (for example Jeddah 2009/2022, or Derna 2023). Visitors watch the map fill up and the dispatch queue sort itself as the clips are processed.
 
-- **Why it proves value:** speed, scale and understanding are shown, not claimed. Sound-only queries ("whistling") show that it hears as well as sees.
-- **How:** `search.query` for each part of the sentence → `start_time` of each hit → a chain of players in the browser. The "human time" comes from total archive hours ÷ 8 h per workday.
+---
 
-## 2. "Ask the Archive": a heritage film library you can talk to
+## 2. Truth Trace: stop fake viral videos
 
-**Value shown: V5 + V1, applied to a real culture problem.**
+**Problem.** During crises, old or unrelated videos go viral with false captions ("this is happening in X right now"). Fact-checkers take hours.
 
-Index a cultural archive, such as decades of public broadcasts, film-festival collections or Saudi/Arab heritage footage. Visitors chat with it: *"How did weddings in Jeddah look in the 1970s?"* or *"Show me old souq scenes with traditional crafts."* The agent answers in text and backs every claim with **clickable moments**.
+**How it works.** Paste a viral video. The agent:
+1. asks CreativAI to describe it (scene, language spoken, signs, weather, landmarks)
+2. runs **web/YouTube searches** for similar footage, imports the candidates and searches them for the same moments
+3. compares: *"This footage first appeared in 2019 in another country. The shop signs are in Turkish, but the caption says Cairo. The speaker's dialect doesn't match."*
+4. publishes a verdict card with side-by-side evidence clips.
 
-- **Why it proves value:** archives hold millions of hours that nobody can watch, and this makes them usable. It's a compelling story for museums, broadcasters and universities, which makes it a real customer pitch as well as a demo.
-- **How:** `agentic_chat.create_session` → stream `thinking/search/answer` events. Showing the agent's search steps live is impressive in itself.
+**Why simple CV can't do this:** it needs language, dialect, signs and reasoning across many videos, plus a memory of the web.
 
-## 3. "Atlas of Everyday Life": 1,000 videos in a spreadsheet
+---
 
-**Value shown: V3, the feature competitors don't have.**
+## 3. Lost & Found: finding lost people at mass gatherings
 
-Import about 1,000 city walking tours from around the world with the built-in YouTube search. Add AI question columns such as *dominant color?*, *is it raining?*, *what are people wearing?*, *mood of the street?* and *loudest sound?*. A few minutes later every moment of every video is a data row. The site renders it as an interactive world map and timeline where each dot plays its clip, and visitors can ask questions like *"Which city has the most umbrellas?"*
+**Problem.** At Hajj, Riyadh Season, stadiums and festivals, children and elderly people get separated from their families. The parent's description is in words: *"6-year-old boy, red shirt, holding a blue balloon, last seen near Gate 4."*
 
-- **Why it proves value:** it shows unstructured video becoming structured data that you can chart, query and export. That's the step from "search engine" to "research tool".
-- **How:** `start_youtube_search` → `confirm_youtube_search` → `data_plates.create_from_collection` → `knowledge_extraction.add_columns` → `export_csv` / `chat_query` → D3 front end.
+**How it works.** Staff type or say the description. CreativAI searches the last 30 minutes of the venue's live cameras in natural language. The agent ranks the matches by time and place, works out the likely direction of movement, and sends the nearest staff a photo and location.
 
-## 4. "The Mirror": a live installation for events
+**Why simple CV can't do this:** you can't train a model for "red shirt + blue balloon + small boy". Free-text descriptions need open-vocabulary search over recent footage.
+*(Needs a clear privacy policy: search only on request, footage kept for a short time only.)*
 
-**Value shown: V4 + V1 together.**
+---
 
-A webcam watches the visitor (in the browser over WebRTC). CreativAI answers live questions: *"What is the person holding?"* and *"What gesture are they making?"*. Each answer instantly becomes a search over the film archive: raise a cup and a wall of movie characters raising cups appears, wave and you get 50 waves from 100 years of cinema.
+## 4. Guardian at Home: support for older people living alone
 
-- **Why it proves value:** in one loop, it shows live understanding feeding instant search over a big library. It draws a crowd at a booth.
-- **How:** `live_stream.stream_webrtc` + `add_questions` → poll the answers → `search.query(archive_cid, answer)` → clip grid.
+**Problem.** Fall detectors only catch falls. Many dangers in daily life are slow and depend on context.
 
-## 5. "Memory Lane": a family's home videos, searchable
+**Live questions** (consented, in-home camera): *Was the medication taken this morning? Has the stove been on with nobody in the kitchen? Is the person repeating the same action in a confused way? Have they eaten today? Did they say they feel unwell?*
+**The agent:** sends a gentle reminder through a speaker, messages family if something persists, and writes a calm daily summary for the doctor showing trends over weeks.
 
-**Value shown: V1 + V5 on content everyone has.**
+**Why simple CV can't do this:** "took medication", "confused" and "didn't eat" are activities that unfold over time and with sound, not objects.
 
-A family connects Google Drive or Dropbox (the import is built in) and asks *"Every birthday where grandpa sang"* or *"Sara's first steps"*. The agent finds the moments and assembles a memory reel.
+---
 
-- **Why it proves value:** "20 years of home video that nobody can find anything in" is a problem everyone has, so the value is clear in a single sentence.
-- **How:** `upload_integrations.google_drive_transfer` → index → `agentic_chat` → stitch the cited moments.
+## 5. City Fix: buses as city inspectors
 
-## 6. "Claude, the editor": an agent cuts a trailer
+**Problem.** Cities find broken infrastructure late, through complaints.
 
-**Value shown: V5, CreativAI as infrastructure for AI agents.**
+Footage from bus and garbage-truck cameras is indexed every day. The city's questions, which can be changed any time in plain English: *blocked wheelchair ramps, broken streetlights at night, flooded underpasses, illegal dumping, missing manhole covers, kids crossing at a dangerous spot with no crosswalk.*
+**The agent:** removes duplicates across days, opens a maintenance ticket with GPS and a clip, tracks repairs, and shows a public "fixed in X days" dashboard.
 
-Claude is connected to CreativAI's hosted MCP server. You say *"Make a 30-second trailer about courage from this archive"*, and Claude searches, picks, orders and outputs an edit list that the site plays.
-
-- **Why it proves value:** it positions CreativAI as the "eyes and ears" for any AI agent working with video, which appeals to a developer audience.
+**Why it beats simple CV:** you write a new check in plain English instead of training a model, and it understands context ("dangerous crossing" isn't an object).
 
 ---
 
 ## Recommendation
 
-Build **#1 "The Haystack"** first. It proves the core value (huge scale, instant results, sees and hears) in the first 10 seconds, the montage makes it fun and shareable, and it only needs search plus a video player.
+**Build Rescue Radar.** It's the most useful idea and the strongest demo, because it uses almost everything CreativAI has:
+- web/YouTube import
+- vision + audio understanding
+- data plates (one AI question per column)
+- live drone streams
+- agentic chat
 
-Then add one of these, depending on the audience:
-- **#3 Atlas**, for investors or technical judges: it shows the data-extraction moat.
-- **#4 Mirror**, for a live event or booth.
-- **#2 Ask the Archive**, for a KAUST or cultural audience: it shows real-world impact.
+The agent layer (Claude through CreativAI's MCP server) is what turns understanding into action. A demo on real past disaster footage, with a map filling up and a dispatch queue ranking itself, is something people remember.
 
-All of them can share **the same indexed archive**, so you only pay for indexing once.
+**Truth Trace** is a good second project: smaller, quick to build, and it gets a lot of public attention.
 
-### Things to verify with a free API key before building
+### Check with a free API key first
+- How fast the knowledge-extraction columns run on new clips. This decides whether Rescue Radar is "near real time" or "batch every few minutes".
+- Live-stream answers are polled (no webhook is documented), so the agent needs a polling loop.
+- What is returned per hit (playable URL? `end_time`?) for the evidence clips.
+- Credits and indexing cost for the footage you plan to use.
 
-- Whether search hits include an `end_time` and a playable URL. The README shows `video_name`, `start_time` and `score`. If there's no URL, host the files yourself and seek by `start_time`.
-- The real search time on a large collection, which is the headline number in #1. Measure it; don't assume it.
-- How long live answers take to arrive, which matters for #4.
-- Indexing cost for the archive (`indexing.estimate_cost`) against your credits.
-- Licensing: use public-domain or Creative Commons footage for anything public.
-
-Sources: [CreativAI Python SDK (PyPI)](https://pypi.org/project/creativai/), [creativai-mcp (PyPI)](https://pypi.org/project/creativai-mcp/), [KAUST profile](https://cemse.kaust.edu.sa/profiles/mohamed-elhoseiny), [GiantLeap session "CreativAI: LLM-powered Video Query Engine at Scale"](https://onegiantleap.com/session/creativai-llm-powered-video-query-engine-scale).
+Sources: [CreativAI Python SDK](https://pypi.org/project/creativai/), [creativai-mcp](https://pypi.org/project/creativai-mcp/), [KAUST profile](https://cemse.kaust.edu.sa/profiles/mohamed-elhoseiny).
