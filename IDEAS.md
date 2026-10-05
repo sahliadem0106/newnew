@@ -1,75 +1,105 @@
-# Showcase ideas built on CreativAI
+# Showcase ideas that prove CreativAI's value
 
 ## What CreativAI is
 
-[CreativAI](https://creativ-ai.com) is a video intelligence platform led by Prof. Mohamed Elhoseiny (KAUST, Vision-CAIR group). It makes video **searchable and queryable**: you upload or import footage, index it once, and then:
+[CreativAI](https://creativ-ai.com) is a video intelligence platform led by Prof. Mohamed Elhoseiny (KAUST, Vision-CAIR group). It indexes video once, up to tens of thousands of hours. After that, everything in it can be **found, questioned and turned into data** using plain language.
 
-| Capability | API surface | What it gives you creatively |
+## The rule for a good showcase
+
+Each idea should make the visitor think: **"this would be impossible without CreativAI."**
+
+So every idea is built around one of the product's five value points, and it shows the payoff on screen: how many hours were searched, how long it took, and how long a human would need.
+
+| # | Value point | API surface |
 |---|---|---|
-| Natural-language moment search | `search.query(cid, "...", search_type="hybrid" \| "vision" \| "audio")` | Exact moments (video + `start_time`) matching any sentence, by what is seen **or heard** |
-| Agentic chat | `agentic_chat.chat(session, "...")` (SSE: thinking → search → answer) | An assistant that reasons over a whole library and cites moments |
-| Data plates + knowledge extraction | `data_plates.*`, `knowledge_extraction.add_columns(...)` | Turns every segment into a spreadsheet row; you add AI "question columns" (text/boolean) → CSV, charts, Q&A |
-| Live streams | `live_stream.stream_webrtc / rtmp / rtsp` + `add_questions([...])` | Real-time answers about a live feed, including a **browser webcam** over WebRTC |
-| Web / YouTube import | `start_youtube_search`, `start_online_search`, `transfers.start(url)` | Builds a corpus from public video in minutes |
-| MCP server (62 tools) | hosted at `ws.creativai-apis.com/api/v2/mcp` | Claude or any agent can drive the whole platform |
+| V1 | **Find any moment** in a huge library by describing it | `search.query(cid, "...")` |
+| V2 | **Sees and hears**: matches on visuals, speech and sounds | `search_type="vision" \| "audio" \| "hybrid"` |
+| V3 | **Video becomes data**: ask a question, get a column for every moment | `data_plates` + `knowledge_extraction.add_columns` → CSV, charts, Q&A |
+| V4 | **Live understanding** of a feed as it happens | `live_stream.stream_webrtc/rtmp/rtsp` + `add_questions` |
+| V5 | **Agent-ready**: an AI assistant can reason over the whole library | `agentic_chat` (SSE), 62-tool MCP server |
 
-The default demos are industrial (dashcams, PPE checks, forklift incidents). The ideas below use the same API for art, play and storytelling instead.
+Its own demos are industrial (dashcams, safety gear). The ideas below show the same five strengths in a form anyone can enjoy.
 
 ---
 
-## 1. "Say It in Cinema": sentence-to-montage machine ⭐ top pick
+## ⭐ 1. "The Haystack": human vs. CreativAI (flagship)
 
-A visitor types a sentence: *"A lonely man walks in the rain, then finds a dog and laughs."* The site splits it into beats, runs a search for each beat across a large indexed archive (public-domain films, Prelinger archives, YouTube travel vlogs), and plays the clips back to back as a montage. It ends with a shareable link.
+**Value shown: V1 + V2, plus scale.**
 
-- **Why it impresses:** it feels like video generation, but every frame is real footage. Hybrid search lets a beat match on sound ("someone laughing", "thunder").
-- **How:** Claude splits the sentence into beats → `search.query` per beat → take the top hit's `start_time` → play a fixed-length window in a browser player chain. Add a "reroll" button per beat that takes hit #2, #3 and so on.
-- **Twist:** a "Poetry mode", where each line of a poem becomes a shot.
+The landing page loads a huge archive, for example **2,000 hours** of public-domain films, newsreels and travel videos. A big counter shows it: *"2,000 hours, 83 days of nonstop video."*
 
-## 2. "The Mirror": your webcam, answered by film history
+The visitor types anything, e.g. *"a cat jumps onto a piano"*, *"someone whistling on a train"* or *"fireworks reflected in water"*. In about a second the page shows the exact moments, with a scoreboard:
 
-The visitor stands in front of a webcam (WebRTC live session). Live questions run continuously: *"What is the person holding?"*, *"What gesture are they making?"*, *"What emotion do they show?"*. Each answer becomes a search query on a film archive, so raising a cup brings up a wall of famous movie characters raising cups. Waving brings up 50 waves from 100 years of cinema.
+> **Searched: 2,000 h · Time: 0.9 s · A human watching would need: 250 workdays**
 
-- **Why it impresses:** it's a strong live installation for an expo or booth, and every visitor gets their own version.
-- **How:** `live_stream.stream_webrtc` + `add_questions` → poll the answers → `search.query(archive_cid, answer)` → render a grid of clips.
+Then comes the creative payoff: one click turns the results into a **montage**. A whole sentence can become a short film, with each part of the sentence becoming a shot ("A lonely man walks in the rain → finds a dog → laughs").
 
-## 3. "Atlas of Everyday Life": data art from 1,000 videos
+- **Why it proves value:** speed, scale and understanding are shown, not claimed. Sound-only queries ("whistling") show that it hears as well as sees.
+- **How:** `search.query` for each part of the sentence → `start_time` of each hit → a chain of players in the browser. The "human time" comes from total archive hours ÷ 8 h per workday.
 
-Import hundreds of city walking tours (Tokyo, Cairo, Lagos, Riyadh, Paris, from the 1900s to today) through YouTube search. Build a data plate and add extraction columns such as *dominant color*, *is it raining?*, *what are people wearing?*, *mood of the street*, *loudest sound*. Then render the CSV as an interactive map or timeline where every dot is a clickable moment.
+## 2. "Ask the Archive": a heritage film library you can talk to
 
-- **Why it impresses:** it reads as a research project and as an artwork at once ("how humanity walks"), and it uses the platform's most distinctive feature, structured extraction.
-- **How:** `start_youtube_search` → `confirm_youtube_search` → `data_plates.create_from_collection` → `knowledge_extraction.add_columns` → `export_csv` → a D3 or Observable front end.
+**Value shown: V5 + V1, applied to a real culture problem.**
 
-## 4. "Moment Hunt": a multiplayer search game
+Index a cultural archive, such as decades of public broadcasts, film-festival collections or Saudi/Arab heritage footage. Visitors chat with it: *"How did weddings in Jeddah look in the 1970s?"* or *"Show me old souq scenes with traditional crafts."* The agent answers in text and backs every claim with **clickable moments**.
 
-The site shows a 3-second clip from the archive. Players race to type a description that makes the search engine find that exact clip, and the closer the rank, the more points. Another mode, "Describe it in 5 words", rewards precise language.
+- **Why it proves value:** archives hold millions of hours that nobody can watch, and this makes them usable. It's a compelling story for museums, broadcasters and universities, which makes it a real customer pitch as well as a demo.
+- **How:** `agentic_chat.create_session` → stream `thinking/search/answer` events. Showing the agent's search steps live is impressive in itself.
 
-- **Why it impresses:** it's addictive, it shows off search quality, and it teaches people how semantic search works.
-- **How:** sample a segment from a data plate → players submit queries → score by the target's rank in `search.query` results.
+## 3. "Atlas of Everyday Life": 1,000 videos in a spreadsheet
 
-## 5. "Memory Lane": talk to a family's home videos
+**Value shown: V3, the feature competitors don't have.**
 
-A family uploads decades of home videos (Google Drive/Dropbox import is built in) and asks *"Show me every birthday where grandpa sang"* or *"When did Sara take her first steps?"*. Agentic chat answers with clips, and the site assembles a short "memory reel" automatically.
+Import about 1,000 city walking tours from around the world with the built-in YouTube search. Add AI question columns such as *dominant color?*, *is it raining?*, *what are people wearing?*, *mood of the street?* and *loudest sound?*. A few minutes later every moment of every video is a data row. The site renders it as an interactive world map and timeline where each dot plays its clip, and visitors can ask questions like *"Which city has the most umbrellas?"*
 
-- **Why it impresses:** it's emotional, and anyone who has a phone full of video wants it.
+- **Why it proves value:** it shows unstructured video becoming structured data that you can chart, query and export. That's the step from "search engine" to "research tool".
+- **How:** `start_youtube_search` → `confirm_youtube_search` → `data_plates.create_from_collection` → `knowledge_extraction.add_columns` → `export_csv` / `chat_query` → D3 front end.
+
+## 4. "The Mirror": a live installation for events
+
+**Value shown: V4 + V1 together.**
+
+A webcam watches the visitor (in the browser over WebRTC). CreativAI answers live questions: *"What is the person holding?"* and *"What gesture are they making?"*. Each answer instantly becomes a search over the film archive: raise a cup and a wall of movie characters raising cups appears, wave and you get 50 waves from 100 years of cinema.
+
+- **Why it proves value:** in one loop, it shows live understanding feeding instant search over a big library. It draws a crowd at a booth.
+- **How:** `live_stream.stream_webrtc` + `add_questions` → poll the answers → `search.query(archive_cid, answer)` → clip grid.
+
+## 5. "Memory Lane": a family's home videos, searchable
+
+**Value shown: V1 + V5 on content everyone has.**
+
+A family connects Google Drive or Dropbox (the import is built in) and asks *"Every birthday where grandpa sang"* or *"Sara's first steps"*. The agent finds the moments and assembles a memory reel.
+
+- **Why it proves value:** "20 years of home video that nobody can find anything in" is a problem everyone has, so the value is clear in a single sentence.
 - **How:** `upload_integrations.google_drive_transfer` → index → `agentic_chat` → stitch the cited moments.
 
-## 6. "Claude, the editor": an agentic film editor over MCP
+## 6. "Claude, the editor": an agent cuts a trailer
 
-Connect Claude to CreativAI's hosted MCP server. Then say *"Make me a 30-second trailer about courage from this archive, with rising music moments at the end."* Claude searches, picks clips, orders them by mood and outputs an edit decision list that the site plays as a trailer.
+**Value shown: V5, CreativAI as infrastructure for AI agents.**
 
-- **Why it impresses:** the tech crowd will be impressed by an AI agent that directs a film by itself.
+Claude is connected to CreativAI's hosted MCP server. You say *"Make a 30-second trailer about courage from this archive"*, and Claude searches, picks, orders and outputs an edit list that the site plays.
+
+- **Why it proves value:** it positions CreativAI as the "eyes and ears" for any AI agent working with video, which appeals to a developer audience.
 
 ---
 
 ## Recommendation
 
-Start with **#1 "Say It in Cinema"**. It's the fastest to build (search plus a player chain), works on the web with no hardware, every result is shareable, and it shows the core technology most clearly. Add **#2 "The Mirror"** as a live-demo mode for events. Both can use the same indexed archive.
+Build **#1 "The Haystack"** first. It proves the core value (huge scale, instant results, sees and hears) in the first 10 seconds, the montage makes it fun and shareable, and it only needs search plus a video player.
+
+Then add one of these, depending on the audience:
+- **#3 Atlas**, for investors or technical judges: it shows the data-extraction moat.
+- **#4 Mirror**, for a live event or booth.
+- **#2 Ask the Archive**, for a KAUST or cultural audience: it shows real-world impact.
+
+All of them can share **the same indexed archive**, so you only pay for indexing once.
 
 ### Things to verify with a free API key before building
 
-- Whether search hits include an `end_time` and a playable URL. The README only shows `video_name`, `start_time` and `score`. If there is no URL, host the archive files yourself and seek by `start_time`.
-- How long live-stream answers take to arrive, which matters for #2.
-- The indexing cost of the archive (`indexing.estimate_cost`) and the credits it uses.
+- Whether search hits include an `end_time` and a playable URL. The README shows `video_name`, `start_time` and `score`. If there's no URL, host the files yourself and seek by `start_time`.
+- The real search time on a large collection, which is the headline number in #1. Measure it; don't assume it.
+- How long live answers take to arrive, which matters for #4.
+- Indexing cost for the archive (`indexing.estimate_cost`) against your credits.
 - Licensing: use public-domain or Creative Commons footage for anything public.
 
-Sources: CreativAI Python SDK README ([PyPI `creativai`](https://pypi.org/project/creativai/)), [PyPI `creativai-mcp`](https://pypi.org/project/creativai-mcp/), [KAUST profile](https://cemse.kaust.edu.sa/profiles/mohamed-elhoseiny), [GiantLeap session "CreativAI: LLM-powered Video Query Engine at Scale"](https://onegiantleap.com/session/creativai-llm-powered-video-query-engine-scale).
+Sources: [CreativAI Python SDK (PyPI)](https://pypi.org/project/creativai/), [creativai-mcp (PyPI)](https://pypi.org/project/creativai-mcp/), [KAUST profile](https://cemse.kaust.edu.sa/profiles/mohamed-elhoseiny), [GiantLeap session "CreativAI: LLM-powered Video Query Engine at Scale"](https://onegiantleap.com/session/creativai-llm-powered-video-query-engine-scale).
