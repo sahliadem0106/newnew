@@ -1,5 +1,7 @@
 # CreativAI + AI agents: footage that triggers action
 
+> **Chosen top 2 (detailed concepts):** [Lost & Found](concepts/lost-and-found.md) · [Guardian at Home](concepts/guardian-at-home.md)
+
 ## The concept
 
 > **CreativAI is the eyes, ears and memory. An AI agent is the brain and hands.**
