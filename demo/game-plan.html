@@ -1,0 +1,233 @@
+<title>Lost &amp; Found Game Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column, read top to bottom: what we build → the story grid (camera × time) → 8 clip cards with prompts → who does what → steps. Same control-room look as the camera map; deliberately dark. */
+:root {
+  color-scheme: dark;
+  --bg: #0d171b;
+  --panel: #13222a;
+  --zone: #172b33;
+  --line: #27404a;
+  --fg: #d8e5e8;
+  --muted: #8ba3aa;
+  --family: #5ec4dc;
+  --child: #f2a541;
+  --alert: #e5605a;
+  --ok: #6fcf8f;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.55; padding-inline: 16px; padding-block: 24px 48px; }
+.wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 28px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 40px; letter-spacing: .03em; text-transform: uppercase; margin: 0; line-height: 1.05; text-wrap: balance; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 24px; letter-spacing: .06em; text-transform: uppercase; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--display); font-weight: 600; font-size: 20px; margin: 0; letter-spacing: .02em; }
+p { margin: 0; max-width: 68ch; }
+.muted { color: var(--muted); }
+.lead { font-size: 17px; }
+section { display: grid; gap: 14px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 18px; display: grid; gap: 12px; min-width: 0; align-content: start; }
+.answer { border-left: 4px solid var(--child); }
+.q { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .q { grid-template-columns: minmax(0, 1fr); } }
+.q .panel b { font-family: var(--display); font-size: 19px; font-weight: 600; letter-spacing: .02em; }
+.scroll { overflow-x: auto; }
+/* camera x time grid */
+.grid svg { display: block; min-width: 760px; width: 100%; height: auto; }
+.lane { fill: var(--zone); }
+.lanelabel { fill: var(--fg); font: 500 12.5px var(--mono); }
+.lanesub { fill: var(--muted); font: 400 11px var(--body); }
+.tick { stroke: var(--line); stroke-width: 1; }
+.ticklabel { fill: var(--muted); font: 500 11.5px var(--mono); }
+.clipbox { stroke: var(--bg); stroke-width: 2; cursor: pointer; }
+.cliptext { fill: var(--bg); font: 600 13px var(--mono); pointer-events: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); font-size: 13px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+/* clip cards */
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .cards { grid-template-columns: minmax(0, 1fr); } }
+.card { scroll-margin-top: 16px; }
+.card:target, .card.flash { outline: 2px solid var(--child); }
+.cardhead { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.num { font: 600 13px var(--mono); color: var(--bg); background: var(--fg); border-radius: 3px; padding: 1px 7px; }
+.num.kid { background: var(--child); } .num.fam { background: var(--family); } .num.both { background: var(--alert); }
+.meta { font: 500 13px var(--mono); color: var(--muted); }
+.why { font-size: 13.5px; color: var(--muted); }
+details { border-top: 1px solid var(--line); padding-top: 10px; }
+summary { cursor: pointer; font-weight: 500; color: var(--fg); }
+pre { white-space: pre-wrap; word-break: break-word; font: 12.5px/1.5 var(--mono); background: var(--zone); border-radius: 4px; padding: 12px; margin: 10px 0 8px; color: var(--fg); }
+button { font: 500 13px var(--body); color: var(--fg); background: var(--zone); border: 1px solid var(--line); border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+button:hover { border-color: var(--muted); }
+button:focus-visible, summary:focus-visible, input:focus-visible { outline: 2px solid var(--child); outline-offset: 2px; }
+/* who does what */
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .two { grid-template-columns: minmax(0, 1fr); } }
+ul.plain { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+/* steps */
+ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+ol.steps li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: start; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; }
+ol.steps input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--ok); }
+ol.steps label { cursor: pointer; display: grid; gap: 2px; }
+ol.steps .who { font: 500 12px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+ol.steps li.done label > span:first-of-type { text-decoration: line-through; color: var(--muted); }
+code { font-family: var(--mono); font-size: 13px; background: var(--zone); padding: 1px 5px; border-radius: 3px; }
+a { color: var(--family); }
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:10px">
+    <h1>Lost &amp; Found Game Plan</h1>
+    <p class="lead">We build a website for mall security. A guard types <i>"Lost boy, about 6, red t-shirt"</i> and the website answers three questions using the mall's camera recordings:</p>
+  </header>
+
+  <div class="q">
+    <div class="panel"><b>1 · Where did the family go?</b><p class="muted">Their path from camera to camera on the mall map.</p></div>
+    <div class="panel"><b>2 · Where did they lose him?</b><p class="muted">The exact clip and second the boy walked away.</p></div>
+    <div class="panel"><b>3 · Where is he now?</b><p class="muted">The last camera that saw him, so a guard can go there.</p></div>
+  </div>
+
+  <div class="panel answer">
+    <h3>Why we make our own footage</h3>
+    <p>Real recordings of a lost child across mall cameras are never published (privacy). Public datasets don't have this story. So we <b>generate 8 short clips with Kling</b> that look like recordings from the mall's security cameras. Then the system searches them exactly as it would search real recordings.</p>
+  </div>
+
+  <section>
+    <h2>The story timeline</h2>
+    <p>Each <b>row</b> is a security camera in the mall. Time runs <b>left to right</b> from 14:00 to 14:35. A real mall records every camera all day; we only make the <b>8 pieces of 15 seconds</b> where something important happens (the coloured boxes). Click a box to jump to its prompt.</p>
+    <div class="panel grid"><div class="scroll"><svg id="timeline" viewBox="0 0 980 400" role="img" aria-label="Cameras by time, with the 8 clips placed on it"></svg></div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--family)"></i>Family together, or parents</span>
+        <span><i class="sw" style="background:var(--alert)"></i>The separation moment</span>
+        <span><i class="sw" style="background:var(--child)"></i>The boy alone</span>
+        <span><i class="sw" style="background:var(--ok)"></i>Report and reunion</span>
+      </div>
+    </div>
+    <p class="muted">Read the boxes in time order and you have the story: the family enters (1), shops together (2), loses the boy in the electronics store (3). He wanders across the atrium (4) and ends up lost at the food court (5). The parents search the wrong side (6), report to security (7), and are reunited with him (8).</p>
+  </section>
+
+  <section>
+    <h2>The 8 clips to generate</h2>
+    <p>Kling 3.0 on Higgsfield, <b>16:9, 15 seconds</b> (10 s is fine if it's cheaper), no audio needed. 8 clips ≈ <b>$7.56</b>, which leaves about $7 to redo bad ones. Every prompt below already includes the camera style and the three characters, so just press Copy.</p>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section>
+    <h2>Who does what</h2>
+    <div class="two">
+      <div class="panel"><h3>You</h3><ul class="plain">
+        <li>Make 3 character pictures (father, mother, boy) on Higgsfield's image tool. Prompts are in Step 1 below.</li>
+        <li>Generate the 8 clips with the prompts above. Use the character pictures as the start or reference image when the tool allows it.</li>
+        <li>Name the files <code>01.mp4</code> … <code>08.mp4</code> and upload them to the repo folder <code>demo/raw/</code> (or send me a Drive link).</li>
+        <li>Get a CreativAI API key and add it to this environment as a secret named <code>CREATIVAI_API_KEY</code>. Don't paste it in chat.</li>
+      </ul></div>
+      <div class="panel"><h3>Me (Claude)</h3><ul class="plain">
+        <li>Add the camera name and clock to every clip so they look like real recordings.</li>
+        <li>Upload them to CreativAI and test the searches.</li>
+        <li>Write the Map code (which camera is next to which, and walking times).</li>
+        <li>Build the website: guard types the report → path on the map → separation clip → "boy is here now".</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Steps, in order</h2>
+    <p class="muted">Tick them off as you go. Ticks are saved only in this browser.</p>
+    <ol class="steps" id="steps"></ol>
+  </section>
+
+  <p class="muted">The mall map with all 12 cameras: <a href="https://claude.ai/artifact/HVa3WZ1nZ6RJsJfK1hpYfL" target="_blank" rel="noopener">Al-Noor Camera Network</a>.</p>
+</div>
+
+<script>
+const STYLE = "Security camera footage. Fixed ceiling-mounted CCTV camera, high angle looking down about 40 degrees, wide-angle lens with slight fisheye, completely static camera, no camera movement, no zoom. Modern Saudi shopping mall, bright LED lighting, polished floor, realistic everyday crowd. Slightly soft surveillance video quality. No on-screen text.";
+const FATHER = "a tall Saudi man in his 40s wearing a white thobe and a red-and-white checkered shemagh, black sandals, carrying a dark green shopping bag";
+const MOTHER = "a woman in a black abaya with a light grey headscarf, carrying a beige handbag";
+const BOY = "a 6-year-old boy with short black hair in a bright red t-shirt, blue jeans and white sneakers";
+const fill = s => s.replaceAll("[FATHER]", FATHER).replaceAll("[MOTHER]", MOTHER).replaceAll("[BOY]", BOY);
+
+// cam row index, start minute, kind, title, scene, why
+const CAMS = [["ENT-01","Main entrance"],["STR-A","Clothing store"],["STR-B","Electronics store"],["ATR-01","Atrium"],["COR-E","East corridor"],["INF-01","Security desk"],["FC-02","Food court"]];
+const CLIPS = [
+  [0, "14:02", "fam", "The family arrives", "Main mall entrance with glass sliding doors, shoppers walking in. [FATHER], [MOTHER] and [BOY] enter together, the boy holding his mother's hand, and walk past under the camera into the mall.", "Shows the boy WITH his parents, and what he looks like."],
+  [1, "14:08", "fam", "Shopping together", "Inside a clothing store with racks of dresses. [MOTHER] browses a rack while [BOY] stands close, holding her abaya. [FATHER] waits nearby holding the shopping bag.", "Still together. One more point on the family's path."],
+  [2, "14:18", "both", "The separation", "Electronics store with phone display tables. [FATHER] tests a phone at a display table, [MOTHER] talks on her mobile phone with her back turned. [BOY] gets bored, wanders between the tables toward the store entrance and walks out of frame alone. Neither parent notices.", "THE key clip: the system must find this moment."],
+  [3, "14:20", "kid", "The boy alone", "Wide mall atrium with a fountain and shoppers crossing. [BOY] walks alone across the atrium, looking around, nobody with him.", "First time the boy is seen alone, away from the store."],
+  [6, "14:23", "kid", "Lost at the food court", "Busy food court with restaurant counters and queues. [BOY] stands still alone next to a counter, looking around anxiously, about to cry. Adults queue around him without noticing.", "Where he is NOW. The answer the guard needs."],
+  [4, "14:25", "fam", "Parents searching", "Long mall corridor with shopfronts. [FATHER] and [MOTHER] hurry along the corridor looking around in panic. The mother calls out, the father checks behind pillars.", "They search the wrong side of the mall."],
+  [5, "14:27", "ok", "Report to security", "Mall information and security desk with a uniformed security guard holding a radio. [FATHER] and [MOTHER] speak urgently to the guard, the mother shows a child's height with her hand. The guard speaks into his radio.", "The moment the case starts in our website."],
+  [6, "14:33", "ok", "Reunion", "Busy food court with restaurant counters. A uniformed security guard walks in with [FATHER] and [MOTHER]. The mother runs to [BOY] and hugs him tightly.", "The happy ending for the demo video."]
+];
+const COLOR = { fam: "var(--family)", both: "var(--alert)", kid: "var(--child)", ok: "var(--ok)" };
+const toMin = s => { const [h, m] = s.split(":").map(Number); return (h - 14) * 60 + m; };
+
+// Timeline grid
+const NS = "http://www.w3.org/2000/svg", svg = document.getElementById("timeline");
+const mk = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); svg.appendChild(e); return e; };
+const L = 150, R = 960, T = 30, RH = 48, x = m => L + (R - L) * m / 35;
+for (let m = 0; m <= 35; m += 5) { mk("line", { class: "tick", x1: x(m), x2: x(m), y1: T - 6, y2: T + CAMS.length * RH }); mk("text", { class: "ticklabel", x: x(m) - 18, y: T - 12 }).textContent = "14:" + String(m).padStart(2, "0"); }
+CAMS.forEach(([id, name], i) => {
+  const y = T + i * RH;
+  mk("rect", { class: "lane", x: L, y: y + 6, width: R - L, height: RH - 12, rx: 3 });
+  mk("text", { class: "lanelabel", x: 8, y: y + 23 }).textContent = id;
+  mk("text", { class: "lanesub", x: 8, y: y + 38 }).textContent = name;
+});
+CLIPS.forEach((c, i) => {
+  const m = toMin(c[1]), y = T + c[0] * RH;
+  const r = mk("rect", { class: "clipbox", x: x(m) - 2, y: y + 8, width: 34, height: RH - 16, rx: 3, fill: COLOR[c[2]], tabindex: 0, role: "link", "aria-label": `Clip ${i + 1}, ${c[1]}, ${c[3]}` });
+  mk("text", { class: "cliptext", x: x(m) + 10, y: y + 29 }).textContent = i + 1;
+  const go = () => { const el = document.getElementById("clip" + (i + 1)); el.scrollIntoView({ behavior: "smooth", block: "start" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1600); };
+  r.addEventListener("click", go); r.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+});
+// boy's walk after separation, as a dashed line between his clips
+const kidPts = [2, 3, 4].map(i => { const c = CLIPS[i]; return [x(toMin(c[1])) + 15, T + c[0] * RH + RH / 2]; });
+const walk = mk("polyline", { points: kidPts.map(p => p.join(",")).join(" "), fill: "none", stroke: "var(--child)", "stroke-width": 2, "stroke-dasharray": "4 5" });
+svg.insertBefore(walk, svg.querySelector(".clipbox"));
+const ty = T + CAMS.length * RH + 30;
+mk("text", { class: "ticklabel", x: L, y: ty }).textContent = "The dashed line is the boy's walk after he leaves the electronics store.";
+
+// Cards
+const cards = document.getElementById("cards");
+CLIPS.forEach((c, i) => {
+  const cam = CAMS[c[0]], prompt = STYLE + "\n\n" + fill(c[4]);
+  const d = document.createElement("article");
+  d.className = "panel card"; d.id = "clip" + (i + 1);
+  d.innerHTML = `<div class="cardhead"><span class="num ${c[2] === "both" ? "both" : c[2] === "kid" ? "kid" : c[2] === "fam" ? "fam" : ""}">${String(i + 1).padStart(2, "0")}</span><h3>${c[3]}</h3></div>
+    <div class="meta">${c[1]} · ${cam[0]} · ${cam[1]}</div>
+    <p>${c[4].replace(/\[(FATHER|MOTHER|BOY)\]/g, (_, w) => "<b>" + w.toLowerCase() + "</b>")}</p>
+    <p class="why">Why: ${c[5]}</p>
+    <details><summary>Full prompt to paste in Kling</summary><pre id="p${i + 1}"></pre><button type="button" id="copy${i + 1}">Copy prompt</button></details>`;
+  cards.appendChild(d);
+  d.querySelector("pre").textContent = prompt;
+  const b = d.querySelector("button");
+  b.addEventListener("click", () => {
+    const done = () => { b.textContent = "Copied"; setTimeout(() => b.textContent = "Copy prompt", 1500); };
+    const fallback = () => { const s = window.getSelection(), r = document.createRange(); r.selectNodeContents(d.querySelector("pre")); s.removeAllRanges(); s.addRange(r); b.textContent = "Selected, press Ctrl+C"; };
+    try { navigator.clipboard.writeText(prompt).then(done, fallback); } catch (e) { fallback(); }
+  });
+});
+
+// Steps
+const STEPS = [
+  ["You", "Make the 3 character pictures", `On Higgsfield's image tool, one full-body picture each, plain background: "${FATHER}", "${MOTHER}", "${BOY}". These keep the clothes the same in every clip.`],
+  ["You", "Generate clips 1–8", "Copy each prompt above. Use the character pictures as reference/start image if available. Redo any clip where the camera moves or the clothes change."],
+  ["You", "Upload the clips", "Name them 01.mp4 … 08.mp4 and put them in demo/raw/ in the repo, or share a Drive link."],
+  ["You", "Get the CreativAI key", "Create an account at creativ-ai.com, copy the API key (profile → API Key), add it as an environment secret CREATIVAI_API_KEY."],
+  ["Me", "Make them look like real recordings", "Add camera name + running clock, then upload all 8 to CreativAI and index them."],
+  ["Me", "Test the three questions", "Search: family with the boy → separation moment → 'small boy in red alone, looking lost'. Check the right clips come back."],
+  ["Me", "Build the website", "Guard types the report → path on the mall map → separation clip → where the boy is now."],
+  ["Both", "Record the demo", "A 3-minute screen recording of the website solving the case, plus the reunion clip at the end."]
+];
+const KEY = "lf-steps";
+let saved = {}; try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+const ol = document.getElementById("steps");
+STEPS.forEach((s, i) => {
+  const li = document.createElement("li"); if (saved[i]) li.classList.add("done");
+  li.innerHTML = `<input type="checkbox" id="step${i}" ${saved[i] ? "checked" : ""}><label for="step${i}"><span><b>${i + 1}. ${s[1]}</b></span><span class="who">${s[0]}</span><span class="muted">${s[2]}</span></label>`;
+  li.querySelector("input").addEventListener("change", e => { saved[i] = e.target.checked; li.classList.toggle("done", e.target.checked); try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (err) {} });
+  ol.appendChild(li);
+});
+</script>
