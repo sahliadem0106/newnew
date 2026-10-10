@@ -1,0 +1,178 @@
+# Project plan: **Lost & Found** (working name)
+
+> **One line:** When a child goes missing in a mall, our system rebuilds the family's path across the security cameras, finds the moment and place they were separated, and then finds where the child is now. It combines **our own camera-graph engine** with **CreativAI's video understanding**.
+
+This file is the single source of truth. The older documents in `concepts/` and `IDEAS.md` are the brainstorm that led here.
+
+---
+
+## 1. The goal
+
+**Main goal:** build a working demo that shows a lost child being found from **real or realistic multi-camera footage** in minutes, not hours, and explains *why* the separation happened.
+
+**What the demo must prove:**
+1. **Where:** we can follow a family from camera to camera using the camera graph (our contribution).
+2. **What and when:** CreativAI finds the exact moment the child stopped being with the parents, using a plain-language question.
+3. **Find:** CreativAI finds the child in that zone from a *description* ("small boy, red shirt, alone, looking lost"). No photo of the child is needed.
+4. **Act:** an agent sends the nearest guard a location, a clip and the path, and writes a case report with the cause.
+
+**Audience:** CreativAI / Prof. Elhoseiny's team, KAUST judges, potential customers (mall operators, event security).
+
+**Pitch line:** *"Trackers tell you where someone went. CreativAI tells you what happened, and finds the child from a sentence."*
+
+---
+
+## 2. Confirmation of what we agreed (and three tweaks)
+
+✅ **Yes, it's a combo:** camera-graph tracking (our way) + CreativAI + an AI agent.
+
+**Tweak 1: the graph decides *where and when* to look, and CreativAI does the looking.**
+We don't build a heavy face-recognition tracker; that already exists commercially. Our engine uses the camera map, the exit edges of each frame and walking times to pick **which cameras and which seconds** to check next. CreativAI is then asked to search exactly those clips. This keeps CreativAI at the centre and makes the graph our own contribution.
+
+**Tweak 2: track the group, not one face.**
+Abayas and thobes look alike, so the "signature" is the **group**: *man in white thobe + red shemagh, woman in black abaya, boy in red t-shirt, green shopping bag*. Faces are used only at the entrance gate (the one place they're clear), and only with consent. Geometry and time (your idea) are the main tie-breaker.
+
+**Tweak 3: footage = real first, generated second.**
+No free dataset contains a "lost child" story, so:
+- **Plan A (best): film it ourselves** with 4–6 phones and friends. It's free and the people are real, so they look the same in every camera.
+- **Plan B: Kling clips** (the 11-shot plan in `demo/lost-and-found-mall-shotlist.md`), if filming isn't possible.
+- **Free public datasets** for testing the graph engine on real security footage and as background crowd clips (section 4).
+
+---
+
+## 3. How it works
+
+```
+             ┌────────────────────────── CASE OPENED ───────────────────────────┐
+             │ Parents report at the desk → guard photo → GROUP SIGNATURE        │
+             └───────────────┬──────────────────────────────────────────────────┘
+                             ▼
+ ① ENTRY LOOKUP      Search the entrance cameras for the group → time they came in
+                             ▼
+ ② GRAPH TRACKING    from the current camera: neighbours + time windows (graph engine)
+    (our code)       → ask CreativAI only about those clips → best match → next hop
+                     → full path ENT-01 → … → INF-01 + list of matched segments
+                             ▼
+ ③ JOURNEY REEL      ffmpeg joins the matched segments into one video
+                     → CreativAI: "When is the child no longer with them?"
+                     → separation moment + camera (e.g. STR-B 14:19:10)
+                             ▼
+ ④ ZONE SWEEP        all cameras within N hops of the separation point, after that time
+                     → CreativAI: "small boy in red t-shirt alone, looking lost"
+                     → graph engine checks the boy's path is physically possible
+                             ▼
+ ⑤ ACT               Agent: alert the nearest guard (location + clip + path)
+                     Case report: path map, separation clip, cause
+                     Over many cases: separation hotspots → recommendations
+```
+
+### Components
+
+| Component | What it is | Status |
+|---|---|---|
+| **Camera topology** | 12 cameras, positions, field of view, walkways in metres | ✅ `demo/mall_topology.json` |
+| **Network viewer** | Floor plan, timeline replay, step-by-step search | ✅ `demo/camera-network.html` ([live](https://claude.ai/artifact/HVa3WZ1nZ6RJsJfK1hpYfL)) |
+| **CCTV overlay tool** | Camera label + running clock on clips | ✅ `demo/cctv_overlay.sh` |
+| **Footage** | ~11 clips following the story timeline | ⏳ to film or generate |
+| **Ingest script** | Upload clips to CreativAI with `camera` + `start_time` tags, index them | ⏳ to build |
+| **Graph engine** | Neighbours, time windows, beam search, path plausibility | ⏳ to build (Python) |
+| **Journey reel builder** | Cuts the matched segments and joins them with ffmpeg | ⏳ to build |
+| **Agent** | Claude + CreativAI MCP: runs the case, explains, writes the alert and report | ⏳ to build |
+| **Case dashboard** | The viewer, upgraded to show real results and clips | ⏳ to build |
+
+### Where CreativAI is used
+
+| Step | CreativAI feature |
+|---|---|
+| Store the footage | `media.upload_file` + `confirm_upload(tags=…)` + `indexing.start` |
+| Find the group/child in candidate clips | `search.query(…, search_type="hybrid")` |
+| "Is the child with them?" for each segment | `data_plates` + `knowledge_extraction.add_columns` |
+| Separation moment in the journey reel | `search.query` / `agentic_chat` on the reel collection |
+| Guard asks questions | `agentic_chat` ("Where is the boy now? Show me.") |
+| The agent's hands | CreativAI MCP server (62 tools) |
+
+---
+
+## 4. Assets & materials
+
+### 4.1 Footage
+
+**Plan A: film it ourselves (recommended, free)**
+- **4–6 phones** on tripods or shelves, placed **high (2.5–3 m) and angled down**, landscape, 1080p, all clocks synced (film a phone stopwatch at the start of each recording).
+- **A location with corridors and rooms:** a university building, a hall or a friend's office floor. Map it to the camera graph (rename the zones to match). Filming inside a real mall needs written permission from mall management.
+- **Cast:** 3 people for the family (an adult can play the "child" in a distinctive outfit), plus 5–10 friends as the crowd, plus one decoy wearing similar clothes.
+- **Consent:** a short written OK from everyone filmed, since the video will be shown publicly.
+
+**Plan B: Kling 3.0 via Higgsfield (~$10.40 of ~$15)**
+- 11 clips plus 4 spares, prompts ready in `demo/lost-and-found-mall-shotlist.md`.
+- Weakness: faces change between clips (clothing usually holds), and the look is a bit "AI".
+
+**Free public multi-camera datasets** (real security-style footage, for testing the graph engine and as background)
+
+| Dataset | What it has | Licence | Use for |
+|---|---|---|---|
+| **[MEVA](https://mevadata.org)** (Kitware/IARPA) | 38 real ground cameras at one facility (indoor + outdoor), actors performing scripted activities, documented camera layout | **CC BY 4.0** (reuse allowed with credit) | **Best match:** a real multi-camera network to run the graph engine on |
+| **[CAVIAR](https://homepages.inf.ed.ac.uk/rbf/CAVIARDATA1/)** (EC project, INRIA) | **Shopping-centre corridor in Lisbon**, 2 synced views (along and across), people walking, browsing, entering shops; ground truth included | **CC BY-SA** (credit the CAVIAR project) | Real mall corridor footage; old and low-res (384×288) |
+| **[WILDTRACK](https://www.epfl.ch/labs/cvlab/data/data-wildtrack/)** (EPFL) | 7 HD cameras with overlapping views of a busy public area, calibrated | Check the download page (research use) | Testing person matching across overlapping cameras |
+| **[MMPTRACK](https://paperswithcode.com/dataset/mmptrack)** (Microsoft) | ~9.6 h, calibrated cameras in **retail, lobby, café, office** scenes, identity labels | Check before use | The closest to a store layout, if available |
+
+⚠️ Avoid **DukeMTMC**: it was withdrawn for privacy reasons. None of these datasets contains a lost-child story or Gulf-style clothing, so they support the demo but can't replace the story footage.
+
+**Mixed option:** use MEVA or CAVIAR clips as the "other cameras" (crowds, cameras with no match) and our own filmed or generated clips for the story cameras. It's realistic, and the system has to ignore the irrelevant cameras.
+
+### 4.2 Accounts & keys
+- **CreativAI API key** (`sk_live_…`), plus the welcome credits (`users.claim_welcome_credits()`). ⏳ needed
+- **Claude API key** for the agent and the photo → group description step. ⏳ needed
+- **Higgsfield** (you have it): only for Plan B.
+- **GitHub repo** (this one).
+
+### 4.3 Software
+- Python 3.10+, `creativai` SDK, `anthropic` SDK, `ffmpeg`.
+- Optional later: an open-source person detector + Re-ID model (e.g. YOLO + OSNet) as an extra matching signal.
+
+---
+
+## 5. Build plan
+
+| Phase | Output | Depends on |
+|---|---|---|
+| **0. Footage** | 11 story clips, renamed `CAM_HHMMSS.mp4`, overlays added | Plan A or B |
+| **1. Ingest** | All clips in one CreativAI collection with camera/time tags; test 5 manual searches | CreativAI key |
+| **2. Graph engine** | Python module: given a sighting, return candidate (camera, window) pairs; beam search over CreativAI hits | topology ✅ |
+| **3. Separation + sweep** | Journey reel + "child no longer with them" query + zone sweep for the child | 1, 2 |
+| **4. Agent + dashboard** | Case flow end to end; dashboard shows path, clips, alert, report | 3 |
+| **5. Demo** | A 3-minute screen recording + a live run + pitch slides | 4 |
+
+**First checks once we have a CreativAI key** (they decide details of phase 2):
+1. Does each search hit return the clip name and its time inside the clip? (needed to get absolute time)
+2. Can search be limited to tagged clips (one camera), or do we filter afterwards?
+3. How long does indexing take for one 15-second clip? (decides "minutes, not hours")
+4. Can a photo be used as a search query?
+
+---
+
+## 6. Risks & how we handle them
+
+| Risk | Plan |
+|---|---|
+| Lookalike clothing (abayas, thobes) | Group signature + the child's clothes + geometry/time windows |
+| CreativAI can't filter by camera | Filter hits after search using tags or file names |
+| AI-generated clips look inconsistent | Prefer Plan A (self-filmed); with Kling, use reference stills and fixed outfit text |
+| Privacy | Search only when a case is open, consent for faces, delete case data after closing, no permanent face database |
+| Budget (Kling) | 11 clips + 4 spares; shorter 8–10 s clips if billing is per second |
+
+---
+
+## 7. Files in this repo
+
+| Path | What |
+|---|---|
+| `PROJECT.md` | This plan |
+| `demo/mall_topology.json` | Camera network + ground-truth story timeline |
+| `demo/camera-network.html` | Interactive viewer ([live](https://claude.ai/artifact/HVa3WZ1nZ6RJsJfK1hpYfL)) |
+| `demo/lost-and-found-mall-shotlist.md` | 11-clip shot list with prompts (Plan B / filming script for Plan A) |
+| `demo/graph-tracking-method.md` | Graph search method in detail |
+| `demo/cctv_overlay.sh` | Adds the camera label + clock to clips |
+| `concepts/system-architecture.md` | Why tracking + CreativAI; lookalike clothing; legal notes |
+| `concepts/lost-and-found.md`, `concepts/guardian-at-home.md` | Original concept docs (Guardian at Home is parked for later) |
+| `IDEAS.md` | The brainstorm |
