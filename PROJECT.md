@@ -2,6 +2,25 @@
 
 > **One line:** When a child goes missing in a mall, our system rebuilds the family's path across the security cameras, finds the moment and place they were separated, and then finds where the child is now. It combines **our own camera-graph engine** with **CreativAI's video understanding**.
 
+## In plain words: what we are building
+
+**A website for mall security.** A guard types: *"Lost boy, about 6, red t-shirt. Family came in around 2 pm."*
+The website shows **on the mall map**: where the family walked, **where the boy got separated**, and **where the boy is now**, with the video clips as proof.
+
+It has only **three pieces**:
+
+| Piece | Nickname | Its only job | Who makes it |
+|---|---|---|---|
+| Camera graph | **The Map** | Knows which cameras are next to each other and how long the walk takes. Answers: *"After camera X at 14:19, check cameras Y and Z between 14:19:30 and 14:20:10."* No AI, just simple code. | Us (Python) |
+| CreativAI | **The Eyes** | Watches the clips the Map points to and answers in words: *"Is this family here?"*, *"Is the child still with them?"*, *"Is there a lost boy in red here?"* | CreativAI API |
+| Claude agent | **The Brain** | Runs the loop (Map → Eyes → Map → Eyes …), talks to the guard and writes the alert. | Claude API |
+
+**The loop works like a detective walking room to room:** the Map says which rooms to check next, the Eyes look, the Map moves forward, and this repeats until the path is complete.
+
+**Parked for later, so ignore these for now:** face scanning at gates, Re-ID models, guessing direction from shop types, separation hotspot statistics.
+
+---
+
 This file is the single source of truth. The older documents in `concepts/` and `IDEAS.md` are the brainstorm that led here.
 
 ---
@@ -107,6 +126,16 @@ No free dataset contains a "lost child" story, so:
 - 11 clips plus 4 spares, prompts ready in `demo/lost-and-found-mall-shotlist.md`.
 - Weakness: faces change between clips (clothing usually holds), and the look is a bit "AI".
 
+**Synthetic multi-camera dataset (best one to start testing with, no filming needed)**
+
+| Dataset | What it has | Licence | Use for |
+|---|---|---|---|
+| **[NVIDIA PhysicalAI-SmartSpaces](https://huggingface.co/datasets/nvidia/PhysicalAI-SmartSpaces/tree/main/MTMC_Tracking_2024)** (the AI City Challenge 2024 data) | Computer-generated indoor spaces (retail-like, warehouse) filmed by **many fixed cameras at once**, with a `video.mp4` + `calibration.json` per camera and the **true path of every person** | **CC BY 4.0** (reuse allowed with credit) | Test the Map + Eyes loop end to end before we have story footage. Download **one scene** (the whole set is ~217 GB). |
+
+**Free stock clips (single camera, for background crowds)**
+- **[Mixkit: mall videos](https://mixkit.co/free-stock-video/mall/)**: free, no watermark, Mixkit licence. Good for "other cameras" full of shoppers.
+- Pexels and Pixabay also have free mall and crowd videos (search "mall", "shopping center", "Dubai mall"). Check each clip's licence page.
+
 **Free public multi-camera datasets** (real security-style footage, for testing the graph engine and as background)
 
 | Dataset | What it has | Licence | Use for |
@@ -115,6 +144,9 @@ No free dataset contains a "lost child" story, so:
 | **[CAVIAR](https://homepages.inf.ed.ac.uk/rbf/CAVIARDATA1/)** (EC project, INRIA) | **Shopping-centre corridor in Lisbon**, 2 synced views (along and across), people walking, browsing, entering shops; ground truth included | **CC BY-SA** (credit the CAVIAR project) | Real mall corridor footage; old and low-res (384×288) |
 | **[WILDTRACK](https://www.epfl.ch/labs/cvlab/data/data-wildtrack/)** (EPFL) | 7 HD cameras with overlapping views of a busy public area, calibrated | Check the download page (research use) | Testing person matching across overlapping cameras |
 | **[MMPTRACK](https://paperswithcode.com/dataset/mmptrack)** (Microsoft) | ~9.6 h, calibrated cameras in **retail, lobby, café, office** scenes, identity labels | Check before use | The closest to a store layout, if available |
+
+| **[EPFL multi-camera pedestrians](https://www.epfl.ch/labs/cvlab/data/data-pom-index-php/)** | Terrace, Passageway, **Laboratory (indoor, 4 cameras)**, Campus; 3–4 synced views, 6–11 people, calibration + some ground truth | Research use (copyright CVLab-EPFL) | Small and easy to start with; low resolution |
+| **[MTMMC](https://sites.google.com/view/mtmmc)** (CVPR 2024) | 16 fixed real cameras densely covering a **campus building** and a factory, RGB + thermal | Check the project page | Most realistic building-wide camera network, if access is granted |
 
 ⚠️ Avoid **DukeMTMC**: it was withdrawn for privacy reasons. None of these datasets contains a lost-child story or Gulf-style clothing, so they support the demo but can't replace the story footage.
 
