@@ -200,6 +200,9 @@ No free dataset contains a "lost child" story, so:
 | Path | What |
 |---|---|
 | `PROJECT.md` | This plan |
+| `demo/prompts/` | **Every prompt to generate**: characters, Case A, Case B (blind test), extras, negative prompt, CreativAI questions |
+| `demo/test-plan.md` | Two cases + trick clips + the blind-test rule |
+| `demo/game-plan.html` | Game plan page with copy buttons ([live](https://claude.ai/artifact/2jrYuhKgMx3jxgKuhXANSf)) |
 | `demo/mall_topology.json` | Camera network + ground-truth story timeline |
 | `demo/camera-network.html` | Interactive viewer ([live](https://claude.ai/artifact/HVa3WZ1nZ6RJsJfK1hpYfL)) |
 | `demo/lost-and-found-mall-shotlist.md` | 11-clip shot list with prompts (Plan B / filming script for Plan A) |

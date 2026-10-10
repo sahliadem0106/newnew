@@ -313,7 +313,15 @@
           "14:19:10"
         ],
         "child_now": "FC-02"
-      }
+      },
+      "decoys": [
+        [
+          "FC-01",
+          "14:24:00",
+          "14:24:15",
+          "lookalike family: man in white thobe + red shemagh, woman in grey hijab, boy in red t-shirt and black shorts, together the whole time"
+        ]
+      ]
     },
     "B": {
       "summary": "Evening. Girl (7, yellow hoodie, purple bunny) leaves the food court table while the mother tends the baby and the father queues; she ends up playing alone in the toy store.",
@@ -388,7 +396,16 @@
           "19:21:05"
         ],
         "child_now": "STR-C"
-      }
+      },
+      "decoys": [
+        [
+          "COR-E",
+          "19:30:00",
+          "19:30:15",
+          "girl in yellow hoodie and jeans briefly alone, her mother catches up and takes her hand"
+        ]
+      ],
+      "blind_test": true
     }
   }
 }

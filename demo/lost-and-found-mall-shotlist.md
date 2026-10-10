@@ -1,5 +1,7 @@
 # Lost & Found demo: footage plan (v2, timeline-based)
 
+> ⚠️ **Superseded.** The current prompts (two cases, trick clips, 15-credit plan) are in [`demo/prompts/`](prompts/README.md).
+
 The mall has a **real camera network**: 12 fixed cameras connected by walkways (`mall_topology.json`). Each clip we generate is a **recording from one of those cameras at a specific time**. Together they tell one story across 30 minutes, the way a security team would actually see it. No two clips show the same moment.
 
 Budget: Kling 3.0 via Higgsfield, ~$0.945 per 15 s clip, ~$15 total.
