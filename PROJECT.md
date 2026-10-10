@@ -211,3 +211,18 @@ No free dataset contains a "lost child" story, so:
 | `concepts/system-architecture.md` | Why tracking + CreativAI; lookalike clothing; legal notes |
 | `concepts/lost-and-found.md`, `concepts/guardian-at-home.md` | Original concept docs (Guardian at Home is parked for later) |
 | `IDEAS.md` | The brainstorm |
+
+---
+
+## Current status & next step (for a new session)
+
+- ✅ Plan, camera map, two cases, trick clips, blind-test rule, all prompts (`demo/prompts/`).
+- ⏳ **Access being set up by the user:**
+  - environment secrets `HIGGSFIELD_API_KEY` (plus `HIGGSFIELD_API_SECRET` if Higgsfield issues two values) and `CREATIVAI_API_KEY`;
+  - network allow-list for `higgsfield.ai` (incl. its API/CDN subdomains), `creativ-ai.com` and `creativai-apis.com`.
+- **Next:**
+  1. Check both APIs answer.
+  2. Generate the 7 character pictures.
+  3. Generate **A1 + A3 only**, confirming the cost with the user first.
+  4. Run the early CreativAI test.
+- **Budget rule:** at most **15 videos** in total. Always ask the user before each paid batch.
