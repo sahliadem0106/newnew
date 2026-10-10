@@ -1,0 +1,54 @@
+{
+  "site": "Al-Noor Mall, ground floor",
+  "units": "metres; plan origin top-left, 100 m x 60 m",
+  "walking_speed_mps": { "adult_min": 0.6, "adult_max": 1.8, "child_min": 0.4, "child_max": 1.6 },
+  "cameras": [
+    { "id": "ENT-01", "name": "Main entrance",          "zone": "entrance",   "pos": [50, 54], "facing_deg": 270, "fov_deg": 90,  "mount": "ceiling 3.5 m above inner doors, facing into mall" },
+    { "id": "ATR-01", "name": "Central atrium",         "zone": "atrium",     "pos": [50, 33], "facing_deg": 90,  "fov_deg": 110, "mount": "ceiling dome, centre of atrium" },
+    { "id": "COR-W",  "name": "Main corridor west",     "zone": "corridor",   "pos": [25, 33], "facing_deg": 180, "fov_deg": 80,  "mount": "pillar 4 m, looking west along corridor" },
+    { "id": "COR-E",  "name": "Main corridor east",     "zone": "corridor",   "pos": [75, 33], "facing_deg": 0,   "fov_deg": 80,  "mount": "pillar 4 m, looking east along corridor" },
+    { "id": "STR-A",  "name": "Fashion House (clothing)","zone": "store",     "pos": [25, 14], "facing_deg": 90,  "fov_deg": 100, "mount": "store ceiling corner, covering racks and door" },
+    { "id": "STR-B",  "name": "TechZone (electronics)", "zone": "store",      "pos": [50, 14], "facing_deg": 90,  "fov_deg": 100, "mount": "store ceiling corner, covering display tables and door" },
+    { "id": "STR-C",  "name": "ToyLand",                "zone": "store",      "pos": [75, 14], "facing_deg": 90,  "fov_deg": 100, "mount": "store ceiling corner" },
+    { "id": "FC-01",  "name": "Food court seating",     "zone": "food_court", "pos": [24, 50], "facing_deg": 90,  "fov_deg": 110, "mount": "ceiling 4 m above seating" },
+    { "id": "FC-02",  "name": "Food court counters",    "zone": "food_court", "pos": [12, 45], "facing_deg": 0,   "fov_deg": 90,  "mount": "wall 3.5 m, facing restaurant counters and queue" },
+    { "id": "INF-01", "name": "Info & security desk",   "zone": "service",    "pos": [69, 47], "facing_deg": 180, "fov_deg": 90,  "mount": "wall behind desk, facing visitors" },
+    { "id": "WC-01",  "name": "Restroom corridor",      "zone": "service",    "pos": [86, 48], "facing_deg": 90,  "fov_deg": 70,  "mount": "corridor ceiling" },
+    { "id": "ENT-02", "name": "Parking entrance",       "zone": "entrance",   "pos": [93, 33], "facing_deg": 180, "fov_deg": 90,  "mount": "ceiling above doors, facing into mall" }
+  ],
+  "edges": [
+    { "a": "ENT-01", "b": "ATR-01", "dist_m": 25 },
+    { "a": "ATR-01", "b": "COR-W",  "dist_m": 25 },
+    { "a": "ATR-01", "b": "COR-E",  "dist_m": 25 },
+    { "a": "ATR-01", "b": "STR-B",  "dist_m": 20 },
+    { "a": "ATR-01", "b": "INF-01", "dist_m": 22 },
+    { "a": "COR-W",  "b": "STR-A",  "dist_m": 18 },
+    { "a": "COR-W",  "b": "FC-01",  "dist_m": 18 },
+    { "a": "FC-01",  "b": "FC-02",  "dist_m": 12 },
+    { "a": "COR-E",  "b": "STR-C",  "dist_m": 18 },
+    { "a": "COR-E",  "b": "INF-01", "dist_m": 15 },
+    { "a": "COR-E",  "b": "WC-01",  "dist_m": 18 },
+    { "a": "COR-E",  "b": "ENT-02", "dist_m": 18 }
+  ],
+  "ground_truth": {
+    "family": [
+      ["ENT-01", "14:02:00", "14:02:40", "with_child"],
+      ["ATR-01", "14:03:00", "14:03:40", "with_child"],
+      ["COR-W",  "14:04:10", "14:04:50", "with_child"],
+      ["STR-A",  "14:05:10", "14:14:00", "with_child"],
+      ["COR-W",  "14:14:20", "14:15:00", "with_child"],
+      ["ATR-01", "14:15:30", "14:16:20", "with_child"],
+      ["STR-B",  "14:16:40", "14:23:30", "child_leaves_14:19:10"],
+      ["ATR-01", "14:23:50", "14:24:20", "without_child"],
+      ["COR-E",  "14:24:40", "14:26:00", "without_child"],
+      ["INF-01", "14:26:20", "14:31:00", "without_child"]
+    ],
+    "child": [
+      ["STR-B",  "14:19:10", "14:19:30"],
+      ["ATR-01", "14:19:50", "14:20:30"],
+      ["COR-W",  "14:21:00", "14:21:40"],
+      ["FC-01",  "14:22:00", "14:22:30"],
+      ["FC-02",  "14:22:50", "14:33:00"]
+    ]
+  }
+}
