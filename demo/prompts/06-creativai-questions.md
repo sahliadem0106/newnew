@@ -15,13 +15,13 @@ Template:
 Case A:
 
 ```
-a man in a white thobe and red-and-white checkered shemagh carrying a dark green shopping bag, a woman in a black abaya and light grey hijab, and a small boy in a bright red t-shirt and blue jeans, walking into the mall together
+a man in a long white robe (thobe) with a red-and-white checkered headscarf (shemagh) carrying a dark green shopping bag, a woman in a long black cloak (abaya) with a light grey headscarf, and a small boy in a bright red t-shirt and blue jeans, walking into the mall together
 ```
 
 Case B:
 
 ```
-a man in a light grey thobe and white ghutra with a black backpack, a woman in a black abaya and niqab with a grey baby stroller, and a small girl in a bright yellow hoodie and pink leggings, walking into the mall together
+a man in a long light grey robe (thobe) with a white headscarf (ghutra) and a black backpack, a woman in a long black cloak (abaya) with her face covered (niqab) pushing a grey baby stroller, and a small girl in a bright yellow hoodie and pink leggings, walking into the mall together
 ```
 
 ## Q2 · Is the child still with them? (one answer per family clip) (column)

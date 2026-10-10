@@ -252,9 +252,9 @@ QUERIES = [
      "Where is the {child_short} now, and how did they get there? Give the camera and time of each sighting."),
 ]
 CASE_TERMS = {
-    "A": {"family": "a man in a white thobe and red-and-white checkered shemagh carrying a dark green shopping bag, a woman in a black abaya and light grey hijab, and a small boy in a bright red t-shirt and blue jeans",
+    "A": {"family": "a man in a long white robe (thobe) with a red-and-white checkered headscarf (shemagh) carrying a dark green shopping bag, a woman in a long black cloak (abaya) with a light grey headscarf, and a small boy in a bright red t-shirt and blue jeans",
           "child": "a small boy of about 6 in a bright red t-shirt, blue jeans and white sneakers", "child_short": "boy in the red t-shirt"},
-    "B": {"family": "a man in a light grey thobe and white ghutra with a black backpack, a woman in a black abaya and niqab with a grey baby stroller, and a small girl in a bright yellow hoodie and pink leggings",
+    "B": {"family": "a man in a long light grey robe (thobe) with a white headscarf (ghutra) and a black backpack, a woman in a long black cloak (abaya) with her face covered (niqab) pushing a grey baby stroller, and a small girl in a bright yellow hoodie and pink leggings",
           "child": "a small girl of about 7 in a bright yellow hoodie and light pink leggings holding a purple plush bunny", "child_short": "girl in the yellow hoodie"},
 }
 
